@@ -1,0 +1,65 @@
+Three generations with six decades of life experience.
+Smoky the Bear secretly started the fires.
+He hated that he loved what she hated about hate.
+It was obvious she was hot, sweaty, and tired.
+She had that tint of craziness in her soul that made her believe she could actually make a difference.
+
+
+
+
+prepMsg takes in a "sentence" which is essentially a list of words in a sequence
+Inside of prepMsg we have a list of words found in the sentence list.
+To maintain integrity of sequence over transmission I will add to every item in the
+words list the item that follows it with a separator so that I we can piece it
+together in the parseResponse function.
+
+prepMsg:
+for word in sentence:
+if sentence[0]: append "^_" before and "__sentence[1]__" after
+elif sentence[len(sentence)-1]: append "__sentence[len(sentence)-2]__" before and "_$" after
+else sentence[n] | n is not first or last: append "__sentence[n-1]__" before and "__sentence[n+1]__" after
+
+
+output example:
+~%_six_&decades&_of_%
+~life__experience._$
+~^_Three__generations
+~__Three__generations__with__
+~__of__life__experience.__
+~__generations__with__six__
+~__decades__of__life__
+~__with__six__decades__
+__six__decades__of__ life__experience._$ ^_Three__generations __Three__generations__with__ __of__life__experience.__ __generations__with__six__ __decades__of__life__ __with__six__decade
+s__
+
+
+
+             ^_Three__generations
+      __Three__generations__with__
+__generations__with__six__
+       __with__six__decades__
+        __six__decades__of__
+    __decades__of__life__
+         __of__life__experience.__
+         life__experience._?
+
+example of another parse instance in a list format
+['__with__six__decades__', '__Three__generations__with__', 'life__experience._?', '^_Three__generations', '__of__life__experience.__',
+'__generations__with__six__', '__decades__of__life__', '__six__decades__of__']
+
+Jofred implementation:
+Look for starter item in list if no starter item look for last item...
+...(search for "^_" or "_?") and append to new list (rList)
+In the current item locate next word by splitting the item and identifying...
+...next or previous word
+Look for next/previous word in list
+
+
+Jesus implementation:
+iterate through list
+initialize empty list full of n empty lists| n=number of words
+see if new list has any lists with starting ^ and place in first compartment
+
+
+
+
