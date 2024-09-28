@@ -1,7 +1,7 @@
 from socket import *
 from utils import *
 import pickle
-import re
+import re, math
 
 serverName = '127.0.0.1'
 serverPort = 12000
@@ -26,53 +26,46 @@ def parseResponse(responseList):
     words = pickle.loads(responseList)
     rList = []
     match = ""
-    for index, word in enumerate(words):
+    for word in words:
         #print(word) # uncomment to see what you are receiving as a response
         if re.findall("^\^.*", word):#first word
-            #match = re.findall("^\^.*", word)
             match = re.findall("\^_(\w+)__",word) #using regex we get the first word of the sentence
-            print("start: ", match)
+            #print("start: ", match)
             match = ' '.join(match) #turns the list containing a single string(match) into just string
             rList.insert(0, match) #insert first word at first index
+            words.pop(words.index(word)) #remove first word from list of words
         elif re.findall("^_?.*_\?$", word):
             match = re.findall("_?(\w+.)_\?$", word)
-            print("end: ", match)
+            #print("end: ", match)
             match = ' '.join(match)
             rList.append(match)
-        else:
+            words.pop(words.index(word)) #remove last word from words
+    #print("words: ", words)
+    #print("rList w start and end: ", rList)
+    for word in words:
             currentWord = re.findall("_&(\w+)&_", word)
-            currentWordIndex = index
-            middle_word_1 = re.findall("^%_(\w+)_&", word) #prev word
+            middle_word_1 = re.findall("^%_(\w+)_&", word) #prev word #regex return a list of items matching declared pattern
             middle_word_2 = re.findall("&_(\w+)_%$", word) #next word
+            currentWord = ' '.join(currentWord)
+            prevWord = ' '.join(middle_word_1) #convert from list item to string
+            nextWord = ' '.join(middle_word_2)
             
-            print("currentWord: ", currentWord) # Debug print
-            print("middle_word_1:", middle_word_1)  # Debug print
-            print("middle_word_2:", middle_word_2)  # Debug print
+            #print("currentWord: ", currentWord) # Debug print
+            #print("middle_word_1:", prevWord)  # Debug print
+            #print("middle_word_2:", nextWord)  # Debug print
             #print("rList:", rList)  # Debug print
             
-            if middle_word_1 and ' '.join(middle_word_1) in rList:
-                rList.insert(' '.join(middle_word_1), index-1)
-                print("it works and we've entered")
-            elif middle_word_2 and ' '.join(middle_word_2) in rList:
-                rList.insert(' '.join(middle_word_2), index+1)
-                print("it works and we've entered")
+            if prevWord in rList:
+                rList.insert(rList.index(prevWord)+1, currentWord)
+                #print("it works and we've entered")
+            elif nextWord in rList:
+                rList.insert(rList.index(nextWord), currentWord)
+                #print("it works and we've entered")
             else:
-                rList.insert(1, currentWord)
+                rList.insert(math.ceil(len(rList)/2), currentWord)
 
-        #elif (' '.join(re.findall("^%_(\w+)_&", word)) in rList) or (' '.join(re.findall("&_(\w+)_%$", word)) in rList):
-        #    print("it works and we've entered")
-        #    match = re.findall("^%_.*_%$", word)
-        #    print("middle: ", match)
-        #    rList.append(match)
-
-    
-
-
-
-
-
-    sentence = ' '.join(words)
-    print(rList)
+    #print("rList: ", rList)
+    sentence = ' '.join(rList)
     return sentence
 
 # Load a message from your text file
@@ -87,13 +80,13 @@ message = prepMsg(messages[0]) # Grabs the first message in the demo file, you c
 clientSocket.sendto(message, (serverName, serverPort))
 response, serverAddress = clientSocket.recvfrom(2048)
 response = parseResponse(response)
-#print(response)
+print(response)
 demoAccuracy(messages[0], response) # Testing one sentence from the demo
 
 
 # TESTING BLOCK (Once you are done with your checking algorithm)
 # set done to True once you're ready!
-done = False
+done = True
 if done:
     tests = []
     total = 0
