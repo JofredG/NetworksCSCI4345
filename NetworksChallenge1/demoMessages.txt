@@ -22,9 +22,9 @@ else sentence[n] | n is not first or last: append "__sentence[n-1]__" before and
 
 output example:
 ~%_six_&decades&_of_%
-~life__experience._$
+~life__experience._?
 ~^_Three__generations
-~__Three__generations__with__
+~%_Three_&generations&_with_%
 ~__of__life__experience.__
 ~__generations__with__six__
 ~__decades__of__life__

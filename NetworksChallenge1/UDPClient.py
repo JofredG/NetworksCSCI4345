@@ -15,7 +15,7 @@ def prepMsg(sentence):
         if i == 0:
             newWords.append("^_" + words[i] + "__" + words[i+1])
         elif i == len(words)-1:
-            newWords.append("__" + words[i-1] + "__" + words[i] + "_?")
+            newWords.append("__" + words[i-1] + "_?" + words[i] + "_?")
         else:
             newWords.append("%_" + words[i-1] + "_&" + words[i] + "&_" + words[i+1] + "_%")
     return pickle.dumps(newWords)
@@ -26,23 +26,44 @@ def parseResponse(responseList):
     words = pickle.loads(responseList)
     rList = []
     match = ""
-    fList = []
-    for word in words:
+    for index, word in enumerate(words):
         #print(word) # uncomment to see what you are receiving as a response
         if re.findall("^\^.*", word):#first word
-            match = re.findall("^\^.*", word)
+            #match = re.findall("^\^.*", word)
+            match = re.findall("\^_(\w+)__",word) #using regex we get the first word of the sentence
             print("start: ", match)
-            rList.append(match)
-        elif re.findall("^__.*_\?$", word):
-            match = re.findall("^__.*_\?$", word)
+            match = ' '.join(match) #turns the list containing a single string(match) into just string
+            rList.insert(0, match) #insert first word at first index
+        elif re.findall("^_?.*_\?$", word):
+            match = re.findall("_?(\w+.)_\?$", word)
             print("end: ", match)
+            match = ' '.join(match)
             rList.append(match)
-        elif re.findall("^%_.*_%$", word):
-            match = re.findall("^%_.*_%$", word)
-            print("middle: ", match)
-            rList.append(match)
-   #for item in rlist:
-   #    sum = 2+2
+        else:
+            currentWord = re.findall("_&(\w+)&_", word)
+            currentWordIndex = index
+            middle_word_1 = re.findall("^%_(\w+)_&", word) #prev word
+            middle_word_2 = re.findall("&_(\w+)_%$", word) #next word
+            
+            print("currentWord: ", currentWord) # Debug print
+            print("middle_word_1:", middle_word_1)  # Debug print
+            print("middle_word_2:", middle_word_2)  # Debug print
+            #print("rList:", rList)  # Debug print
+            
+            if middle_word_1 and ' '.join(middle_word_1) in rList:
+                rList.insert(' '.join(middle_word_1), index-1)
+                print("it works and we've entered")
+            elif middle_word_2 and ' '.join(middle_word_2) in rList:
+                rList.insert(' '.join(middle_word_2), index+1)
+                print("it works and we've entered")
+            else:
+                rList.insert(1, currentWord)
+
+        #elif (' '.join(re.findall("^%_(\w+)_&", word)) in rList) or (' '.join(re.findall("&_(\w+)_%$", word)) in rList):
+        #    print("it works and we've entered")
+        #    match = re.findall("^%_.*_%$", word)
+        #    print("middle: ", match)
+        #    rList.append(match)
 
     
 
